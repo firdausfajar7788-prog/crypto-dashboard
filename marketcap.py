@@ -1,3 +1,4 @@
+
 import streamlit as st
 import requests
 import pandas as pd
@@ -8,7 +9,7 @@ import time
 # CONFIG
 # ====================================
 st.set_page_config(
-    page_title="Monitoring",
+    page_title="🚀 Crypto AI Dashboard",
     layout="wide"
 )
 
@@ -22,11 +23,11 @@ headers = {
 # ====================================
 # TITLE
 # ====================================
-st.title("GAS!!!")
-st.caption("EMA + RSI + Fibonacci + Support Resistance")
+st.title("🚀 Crypto AI Dashboard PRO")
+st.caption("AI Monitoring + EMA + RSI + Fibonacci + Entry Assistant")
 
 # ====================================
-# INPUT COIN
+# INPUT
 # ====================================
 coin_input = st.text_input(
     "Masukkan Coin",
@@ -43,13 +44,13 @@ refresh = st.sidebar.slider(
 )
 
 # ====================================
-# PRICE HISTORY STORAGE
+# HISTORY
 # ====================================
 if "history" not in st.session_state:
     st.session_state.history = {}
 
 # ====================================
-# GET USD IDR
+# USD IDR
 # ====================================
 @st.cache_data(ttl=60)
 def get_usd_idr():
@@ -63,7 +64,7 @@ def get_usd_idr():
     return data["rates"]["IDR"]
 
 # ====================================
-# GET COIN DATA
+# GET DATA
 # ====================================
 @st.cache_data(ttl=5)
 def get_data(symbols):
@@ -181,6 +182,54 @@ def market_status(price, ema20, ema50, rsi):
         return "📊 Sideways"
 
 # ====================================
+# AI SIGNAL
+# ====================================
+def ai_signal(status, rsi, price, support1, resistance1):
+
+    if rsi is None:
+        return {
+            "signal": "WAIT",
+            "entry": "-",
+            "tp": "-",
+            "sl": "-",
+            "confidence": "0%"
+        }
+
+    if status == "🚀 Bullish":
+
+        confidence = min(95, int(rsi + 20))
+
+        return {
+            "signal": "🟢 BUY",
+            "entry": f"Rp {support1:,.0f}",
+            "tp": f"Rp {resistance1:,.0f}",
+            "sl": f"Rp {support1 * 0.97:,.0f}",
+            "confidence": f"{confidence}%"
+        }
+
+    elif status == "🔻 Bearish":
+
+        confidence = min(95, int(100 - rsi))
+
+        return {
+            "signal": "🔴 SELL / WAIT",
+            "entry": "Tunggu reversal",
+            "tp": "-",
+            "sl": "-",
+            "confidence": f"{confidence}%"
+        }
+
+    else:
+
+        return {
+            "signal": "📊 WAIT",
+            "entry": "Area sideways",
+            "tp": "-",
+            "sl": "-",
+            "confidence": "50%"
+        }
+
+# ====================================
 # MAIN LOOP
 # ====================================
 placeholder = st.empty()
@@ -221,16 +270,14 @@ while True:
                 marketcap = coin["quote"]["USD"]["market_cap"]
 
                 # =========================
-                # SAVE HISTORY
+                # HISTORY
                 # =========================
-
                 if symbol not in st.session_state.history:
 
-                    # isi history awal
                     st.session_state.history[symbol] = [
                         price_idr * (1 + (i * 0.001))
                         for i in range(60)
-                         ]
+                    ]
 
                 st.session_state.history[symbol].append(price_idr)
 
@@ -240,14 +287,10 @@ while True:
                 prices = st.session_state.history[symbol]
 
                 # =========================
-                # EMA
+                # EMA RSI
                 # =========================
                 ema20 = calculate_ema(prices, 20)
                 ema50 = calculate_ema(prices, 50)
-
-                # =========================
-                # RSI
-                # =========================
                 rsi = calculate_rsi(prices)
 
                 # =========================
@@ -261,7 +304,7 @@ while True:
                 f236, f382, f500, f618, f786 = fibonacci_levels(price_idr)
 
                 # =========================
-                # MARKET STATUS
+                # STATUS
                 # =========================
                 status = market_status(
                     price_idr,
@@ -270,61 +313,53 @@ while True:
                     rsi
                 )
 
+                # =========================
+                # AI SIGNAL
+                # =========================
+                ai = ai_signal(
+                    status,
+                    rsi,
+                    price_idr,
+                    s1,
+                    r1
+                )
+
                 rows.append({
 
-                    "Coin":
-                    symbol,
+                    "Coin": symbol,
 
-                    "Harga":
-                    f"Rp {price_idr:,.0f}",
+                    "Harga": f"Rp {price_idr:,.0f}",
 
-                    "24h %":
-                    f"{change24}%",
+                    "24h %": f"{change24}%",
 
-                    "EMA20":
-                    f"Rp {ema20:,.0f}" if ema20 else "-",
+                    "EMA20": f"Rp {ema20:,.0f}" if ema20 else "-",
 
-                    "EMA50":
-                    f"Rp {ema50:,.0f}" if ema50 else "-",
+                    "EMA50": f"Rp {ema50:,.0f}" if ema50 else "-",
 
-                    "RSI":
-                    round(rsi, 2) if rsi else "-",
+                    "RSI": round(rsi, 2) if rsi else "-",
 
-                    "Volume":
-                    f"${volume:,.0f}",
+                    "Support 1": f"Rp {s1:,.0f}",
+                    "Support 2": f"Rp {s2:,.0f}",
 
-                    "Market Cap":
-                    f"${marketcap:,.0f}",
+                    "Resistance 1": f"Rp {r1:,.0f}",
+                    "Resistance 2": f"Rp {r2:,.0f}",
 
-                    "Support 1":
-                    f"Rp {s1:,.0f}",
+                    "Fib 0.236": f"Rp {f236:,.0f}",
+                    "Fib 0.382": f"Rp {f382:,.0f}",
+                    "Fib 0.5": f"Rp {f500:,.0f}",
+                    "Fib 0.618": f"Rp {f618:,.0f}",
+                    "Fib 0.786": f"Rp {f786:,.0f}",
 
-                    "Support 2":
-                    f"Rp {s2:,.0f}",
+                    "Volume": f"${volume:,.0f}",
+                    "Market Cap": f"${marketcap:,.0f}",
 
-                    "Resistance 1":
-                    f"Rp {r1:,.0f}",
+                    "Status": status,
 
-                    "Resistance 2":
-                    f"Rp {r2:,.0f}",
-
-                    "Fib 0.236":
-                    f"Rp {f236:,.0f}",
-
-                    "Fib 0.382":
-                    f"Rp {f382:,.0f}",
-
-                    "Fib 0.5":
-                    f"Rp {f500:,.0f}",
-
-                    "Fib 0.618":
-                    f"Rp {f618:,.0f}",
-
-                    "Fib 0.786":
-                    f"Rp {f786:,.0f}",
-
-                    "Status":
-                    status
+                    "AI Signal": ai["signal"],
+                    "AI Entry": ai["entry"],
+                    "AI TP": ai["tp"],
+                    "AI SL": ai["sl"],
+                    "Confidence": ai["confidence"]
                 })
 
             df = pd.DataFrame(rows)
@@ -332,7 +367,7 @@ while True:
             # ====================================
             # TABLE
             # ====================================
-            st.subheader("📊 Market Monitoring")
+            st.subheader("📊 AI Market Monitoring")
 
             st.dataframe(
                 df,
@@ -343,9 +378,9 @@ while True:
             st.divider()
 
             # ====================================
-            # QUICK VIEW
+            # AI QUICK VIEW
             # ====================================
-            st.subheader("🔥 Quick View")
+            st.subheader("🤖 AI Assistant")
 
             cols = st.columns(len(rows))
 
@@ -360,10 +395,16 @@ while True:
                     )
 
                     st.write(f"📈 {row['Status']}")
+                    st.write(f"🤖 {row['AI Signal']}")
+                    st.write(f"🎯 Entry : {row['AI Entry']}")
+                    st.write(f"🎯 TP : {row['AI TP']}")
+                    st.write(f"🛑 SL : {row['AI SL']}")
+                    st.write(f"⚡ Confidence : {row['Confidence']}")
+
+                    st.write("---")
 
                     st.write(f"EMA20 : {row['EMA20']}")
                     st.write(f"EMA50 : {row['EMA50']}")
-
                     st.write(f"RSI : {row['RSI']}")
 
                     st.write("🟢 SUPPORT")
@@ -385,3 +426,4 @@ while True:
     time.sleep(refresh)
 
     st.rerun()
+
