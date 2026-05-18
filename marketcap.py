@@ -9,7 +9,7 @@ import time
 # CONFIG
 # ====================================
 st.set_page_config(
-    page_title="🚀 Crypto AI Dashboard",
+    page_title="Dashboard",
     layout="wide"
 )
 
@@ -23,7 +23,7 @@ headers = {
 # ====================================
 # TITLE
 # ====================================
-st.title("🚀 Crypto AI Dashboard PRO")
+st.title("GASS!!!")
 st.caption("AI Monitoring + EMA + RSI + Fibonacci + Entry Assistant")
 
 # ====================================
