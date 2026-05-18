@@ -8,7 +8,7 @@ import time
 # CONFIG
 # ====================================
 st.set_page_config(
-    page_title="~",
+    page_title="Monitoring",
     layout="wide"
 )
 
@@ -22,7 +22,7 @@ headers = {
 # ====================================
 # TITLE
 # ====================================
-st.title("~")
+st.title("GAS!!!")
 st.caption("EMA + RSI + Fibonacci + Support Resistance")
 
 # ====================================
