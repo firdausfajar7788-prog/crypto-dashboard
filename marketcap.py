@@ -12,7 +12,7 @@ st.set_page_config(
     layout="wide"
 )
 
-API_KEY = "d5fd785f412047069ceeb40ca2d6203b"
+API_KEY = st.secrets["CMC_API_KEY"]
 
 headers = {
     "Accepts": "application/json",
